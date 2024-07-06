@@ -9,10 +9,9 @@ pipeline {
         IMAGE_TAG = "v2"
     }
 
-    
     stages {
 
-         stage('Install Dependencies and Build') {
+        stage('Install Dependencies and Build') {
             steps {
                 sh '''
                     npm install
@@ -41,13 +40,10 @@ pipeline {
             steps {
                 sh '''
                     echo '{{- range . }}\n{{ .Target }}\n{{ range .Vulnerabilities }}\n{{ .VulnerabilityID }} {{ .PkgName }} {{ .InstalledVersion }} {{ .FixedVersion }} {{ .Severity }} {{ .Title }}\n{{ end }}\n{{ end }}' > trivy-template.tpl
-                   // trivy image --template trivy-template.tpl --output trivy_report.html $ECR_REPOSITORY_URI:$IMAGE_TAG
                     trivy image --format template --template trivy-template.tpl --output trivy_report.html $ECR_REPOSITORY_URI:$IMAGE_TAG
-                '''
                 '''
             }
         }
-
 
         stage('Tag Docker Image') {
             steps {
@@ -59,7 +55,7 @@ pipeline {
             }
         }
 
-       stage('Login to ECR') {
+        stage('Login to ECR') {
             steps {
                 script {
                     sh '''
@@ -68,7 +64,6 @@ pipeline {
                 }
             }
         }
- 
 
         stage('Push Docker Image to ECR') {
             steps {
@@ -79,6 +74,5 @@ pipeline {
                 }
             }
         }
-                    
     }
 }
