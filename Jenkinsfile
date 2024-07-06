@@ -5,7 +5,7 @@ pipeline {
         AWS_ACCESS_KEY_ID = credentials('aws-ECR-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-ECR-secret-access-key')
         AWS_REGION = 'us-east-1'
-        ECR_REPOSITORY_URI = '637423529262.dkr.ecr.us-east-1.amazonaws.com/ecr-netflix'
+        ECR_REPOSITORY_URI = '637423529262.dkr.ecr.us-east-1.amazonaws.com/ecr-jenkins'
         IMAGE_TAG = "v2"
     }
 
