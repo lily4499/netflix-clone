@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker build -t ecr-jenkins:$IMAGE_TAG .
+                        docker build -t react-netflix-clone .
                     '''
                 }
             }
@@ -53,7 +53,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker tag ecr-jenkins:$IMAGE_TAG $ECR_REPOSITORY_URI:$IMAGE_TAG
+                        docker tag react-netflix-clone $ECR_REPOSITORY_URI:$IMAGE_TAG
                     '''
                 }
             }
