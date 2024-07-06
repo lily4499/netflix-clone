@@ -2,63 +2,31 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_ACCESS_KEY_ID = credentials('aws-ECR-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-ECR-secret-access-key')
         AWS_REGION = 'us-east-1'
         ECR_REPOSITORY_URI = '637423529262.dkr.ecr.us-east-1.amazonaws.com/ecr-jenkins'
         IMAGE_TAG = "v2"
     }
 
+    
     stages {
-        stage('Login to ECR') {
+
+         stage('Install Dependencies and Build') {
             steps {
-                script {
-                    sh '''
-                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
-                    '''
-                }
+                sh '''
+                    npm install
+                    npm run build
+                '''
             }
         }
-
+        
         stage('Build Docker Image') {
             steps {
                 script {
                     sh '''
                         docker build -t ecr-jenkins:$IMAGE_TAG .
                     '''
-                }
-            }
-        }
-
-        stage('Tag Docker Image') {
-            steps {
-                script {
-                    sh '''
-                        docker tag ecr-jenkins:$IMAGE_TAG $ECR_REPOSITORY_URI:$IMAGE_TAG
-                    '''
-                }
-            }
-        }
-
-        stage('Push Docker Image to ECR') {
-            steps {
-                script {
-                    sh '''
-                        docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
-                    '''
-                }
-            }
-        }
-
-        stage('Install Trivy') {
-            steps {
-                script {
-                    def trivyInstalled = sh(script: 'which trivy', returnStatus: true) == 0
-                    if (!trivyInstalled) {
-                        sh '''
-                            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-                        '''
-                    }
                 }
             }
         }
@@ -80,13 +48,37 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies and Build') {
+
+        stage('Tag Docker Image') {
             steps {
-                sh '''
-                    npm install
-                    npm run build
-                '''
+                script {
+                    sh '''
+                        docker tag ecr-jenkins:$IMAGE_TAG $ECR_REPOSITORY_URI:$IMAGE_TAG
+                    '''
+                }
             }
         }
+
+       stage('Login to ECR') {
+            steps {
+                script {
+                    sh '''
+                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
+                    '''
+                }
+            }
+        }
+ 
+
+        stage('Push Docker Image to ECR') {
+            steps {
+                script {
+                    sh '''
+                        docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+                    '''
+                }
+            }
+        }
+                    
     }
 }
